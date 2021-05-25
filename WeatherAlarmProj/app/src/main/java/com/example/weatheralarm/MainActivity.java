@@ -245,22 +245,24 @@ public class MainActivity extends ListActivity implements AdapterView.OnItemClic
 
     int getPosition(Calendar alarmTime)
     {
+        int pos = 0;
+
         if(alarmList.size() == 0)
         {
-            return 0;
+            return pos;
         }
         else
         {
             for (int idx = 0; idx < alarmList.size(); idx++)
             {
-                if (alarmTime.getTimeInMillis() < alarmList.get(idx).getTimeInMillis())
+                if (alarmTime.getTimeInMillis() > alarmList.get(idx).getTimeInMillis())
                 {
                     System.out.println("index " + idx);
-                    return idx;
+                    pos = idx + 1;
                 }
             }
         }
 
-        return 0;
+        return pos;
     }
 }
