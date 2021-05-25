@@ -5,7 +5,9 @@ import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.ListActivity;
 import android.app.TimePickerDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
@@ -39,25 +42,29 @@ import java.util.Locale;
 
 public class MainActivity extends ListActivity implements AdapterView.OnItemClickListener {
 
+    public ListItemComponent adapter;
     boolean databaseWritten = false;
 
-    //LIST OF ARRAY STRINGS WHICH WILL SERVE AS LIST ITEMS
     ArrayList<String> listItems = new ArrayList<String>();
     ArrayList<Calendar> alarmList = new ArrayList<Calendar>();
     int alarmCount = 0;
     TimePickerDialog timePicker;
     DatePickerDialog datePicker;
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy    HH:mm", Locale.ENGLISH);
-    //ArrayList<AlarmListener> alarmListenerList = new ArrayList<AlarmListener>();
 
-    AlarmListener alarmListener = new AlarmListener();
+    public AlarmListener alarmListener = new AlarmListener()
+    {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            alarmList.remove(0);
+            listItems.remove(0);
+            adapter.notifyDataSetChanged();
+            if (!alarmList.isEmpty()) {
+                alarmListener.setAlarm(MainActivity.this, alarmList.get(0).getTimeInMillis() - System.currentTimeMillis());
+            }
+        }
+    };
 
-    //DEFINING A STRING ADAPTER WHICH WILL HANDLE THE DATA OF THE LISTVIEW
-    //ArrayAdapter<String> adapter;
-    ListItemComponent adapter;
-
-    //RECORDING HOW MANY TIMES THE BUTTON HAS BEEN CLICKED
-    int clickCounter = 0;
 
     protected void SaveFileToInternalStorage(String s) {
 
@@ -86,7 +93,7 @@ public class MainActivity extends ListActivity implements AdapterView.OnItemClic
     @Override
     public void onCreate(Bundle icicle) {
 
-        registerReceiver(alarmListener, new IntentFilter());
+        registerReceiver(alarmListener, new IntentFilter("ALARM_NOTIFY"));
         TTSManager.getInstance(this);
         databaseWritten = false;
 
@@ -98,9 +105,7 @@ public class MainActivity extends ListActivity implements AdapterView.OnItemClic
         super.onCreate(icicle);
         setContentView(R.layout.activity_main);
         adapter = new ListItemComponent(listItems, alarmList, alarmListener, this);
-//        adapter = new ArrayAdapter<String>(this,
-//                android.R.layout.simple_list_item_1,
-//                listItems);
+
         setListAdapter(adapter);
 
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -138,11 +143,9 @@ public class MainActivity extends ListActivity implements AdapterView.OnItemClic
         super.onStop();
     }
 
-    // Create a message handling object as an anonymous class.
     public void onItemClick(AdapterView parent, View v, int position, long id) {
     }
 
-    //METHOD WHICH WILL HANDLE DYNAMIC INSERTION
     public void addItems(View view) {
 
         final Calendar cldr = Calendar.getInstance();
@@ -181,7 +184,10 @@ public class MainActivity extends ListActivity implements AdapterView.OnItemClic
                                         //SaveFileToInternalStorage(listItems.get(listItems.size() - 1));
 
                                         //AlarmListener al = new AlarmListener();
-                                        alarmListener.setAlarm(MainActivity.this, alarmInfo.getTimeInMillis() - System.currentTimeMillis());
+                                        if(pos == 0)
+                                        {
+                                            alarmListener.setAlarm(MainActivity.this, alarmInfo.getTimeInMillis() - System.currentTimeMillis());
+                                        }
 
                                         System.out.println(alarmInfo.getTimeInMillis() - System.currentTimeMillis());
 
@@ -257,7 +263,6 @@ public class MainActivity extends ListActivity implements AdapterView.OnItemClic
             {
                 if (alarmTime.getTimeInMillis() > alarmList.get(idx).getTimeInMillis())
                 {
-                    System.out.println("index " + idx);
                     pos = idx + 1;
                 }
             }

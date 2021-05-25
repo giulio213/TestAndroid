@@ -31,7 +31,6 @@ public class ListItemComponent extends BaseAdapter implements ListAdapter {
     private ArrayList<Calendar> alarmList = new ArrayList<Calendar>();
     private Context context;
     private AlarmListener alarmListener;
-    static int counter = 0;
 
     TimePickerDialog timePicker;
     DatePickerDialog datePicker;
@@ -78,7 +77,11 @@ public class ListItemComponent extends BaseAdapter implements ListAdapter {
             @Override
             public void onClick(View v) {
                 list.remove(position);
-                alarmListener.cancelAlarm(context);
+
+                if(position == 0)
+                {
+                    alarmListener.cancelAlarm(context);
+                }
 
                 notifyDataSetChanged();
             }
@@ -111,10 +114,8 @@ public class ListItemComponent extends BaseAdapter implements ListAdapter {
                                                 alarmList.set(position, alarmInfo);
                                                 list.set(position, dayOfMonth + "/" + monthOfYear + "/" + year + "    " + hour + ":" + minute);
 
-                                                alarmListener.cancelAlarm(context);
-                                                alarmListener.setAlarm(context, alarmInfo.getTimeInMillis() - System.currentTimeMillis());
-                                                //editFile(position);
-
+//                                                alarmListener.cancelAlarm(context);
+//                                                alarmListener.setAlarm(context, alarmInfo.getTimeInMillis() - System.currentTimeMillis());
 
                                                 notifyDataSetChanged();
                                             }
@@ -129,96 +130,5 @@ public class ListItemComponent extends BaseAdapter implements ListAdapter {
         });
 
         return view;
-    }
-
-//    public void editFile(int position) {
-//        String ret = "";
-//
-//        try {
-//            InputStream inputStream = context.openFileInput("alarm_list.txt");
-//
-//            if (inputStream != null) {
-//                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-//                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-//                String receiveString = "";
-//                StringBuilder stringBuilder = new StringBuilder();
-//
-//                clearFile();
-//
-//                while (position > 0 && (receiveString = bufferedReader.readLine()) != null) {
-//                    appendToFile(receiveString);
-//                    position--;
-//                }
-//
-//                inputStream.close();
-//                ret = stringBuilder.toString();
-//            }
-//        } catch (FileNotFoundException e) {
-//            Log.e("login activity", "File not found: " + e.toString());
-//        } catch (IOException e) {
-//            Log.e("login activity", "Can not read file: " + e.toString());
-//        }
-//    }
-
-    //    public void appendToFile(String s) {
-//        try {
-//            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("alarm_list.txt", Context.MODE_APPEND));
-//            outputStreamWriter.write(s + "\n");
-//            outputStreamWriter.close();
-//        } catch (Exception e) {
-//        }
-//    }
-//
-    protected void SaveFileToInternalStorage(String s) {
-
-        System.out.println(context.getFilesDir());
-
-        File file = new File(context.getFilesDir(), "alarm_list.txt");
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        try {
-
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(file.getName(), Context.MODE_APPEND));
-            outputStreamWriter.write(s + "\n");
-            outputStreamWriter.close();
-        } catch (Exception e) {
-            System.out.println(e.getLocalizedMessage());
-        }
-
-    }
-
-    public void clearFile() {
-        try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("alarm_list.txt", Context.MODE_PRIVATE));
-            outputStreamWriter.write("");
-            outputStreamWriter.close();
-        } catch (Exception e) {
-        }
-    }
-
-    int getPosition(Calendar alarmTime)
-    {
-        if(alarmList.size() == 0)
-        {
-            return 0;
-        }
-        else
-        {
-            for (int idx = 0; idx < alarmList.size(); idx++)
-            {
-                if (alarmList.get(idx).getTimeInMillis() > alarmTime.getTimeInMillis())
-                {
-                    return idx;
-                }
-            }
-        }
-
-        return 0;
     }
 }
