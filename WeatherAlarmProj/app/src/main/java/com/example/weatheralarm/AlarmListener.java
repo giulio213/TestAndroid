@@ -127,7 +127,13 @@ public class AlarmListener extends BroadcastReceiver {
         JSONObject jsonObject = jsonArray.getJSONObject(0);
         String generalWeather = jsonObject.getString("description");
 
-        setSt(generalWeather);
+        jsonObject = jObject.getJSONObject("main");
+        double temperature = Math.ceil(Double.parseDouble(jsonObject.getString("temp"))) - 273;
+
+        jsonObject = jObject.getJSONObject("wind");
+        String wind = jsonObject.getString("speed");
+
+        setSt(generalWeather + ", " + temperature + " degrees, wind intensity is " + wind + " meters per second");
     }
 
     public void getLocation(Context context)
